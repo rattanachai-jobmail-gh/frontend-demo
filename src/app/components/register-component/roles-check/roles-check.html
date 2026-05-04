@@ -1,0 +1,16 @@
+<label class="field">
+    <span>Role</span>
+    <div class="role-grid">
+        @for (role of roleOptions; track role) {
+            <label class="role-option">
+                <input
+                    type="checkbox"
+                    #isChecked
+                    [disabled]="selectedRolesInput"
+                    (change)="onCheck(role,isChecked.checked)"
+                />
+                <span>{{ role }}</span>
+            </label>
+        }
+    </div>
+</label>

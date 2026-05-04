@@ -1,0 +1,21 @@
+/.angular/cache
+/dist
+/tmp
+/out-tsc
+/node_modules
+
+# IDEs and editors
+/.idea
+/.vscode/*
+!/.vscode/extensions.json
+!/.vscode/launch.json
+!/.vscode/tasks.json
+
+# Logs
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# OS files
+.DS_Store
+Thumbs.db

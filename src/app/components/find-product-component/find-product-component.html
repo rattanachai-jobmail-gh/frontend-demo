@@ -1,0 +1,444 @@
+<section class="find-product-shell">
+  <nav class="find-product-nav">
+    <div class="nav-brand">
+      <span class="nav-eyebrow noto-sans-thai-f">Inventory Workspace</span>
+      <div class="nav-title noto-sans-thai-f">ค้นหา แก้ไข และจัดการสินค้า</div>
+    </div>
+
+    <ul class="nav-links">
+      <li>
+        <a
+          class="nav-link noto-sans-thai-f"
+          routerLink="/home"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          หน้าแรก
+        </a>
+      </li>
+      <li>
+        <a
+          class="nav-link noto-sans-thai-f"
+          routerLink="/add-product"
+          routerLinkActive="is-active"
+        >
+          เพิ่มสินค้า
+        </a>
+      </li>
+      <li>
+        <button type="button" class="nav-link nav-link-danger noto-sans-thai-f" (click)="logout()">
+          ออกจากระบบ
+        </button>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="find-product-page">
+    <section class="find-product-hero">
+      <div class="hero-copy-block">
+        <p class="hero-kicker noto-sans-thai-f">Product Search</p>
+        <h1 class="hero-title noto-sans-thai-f">ค้นหาสินค้าและเตรียมแก้ไขได้จากหน้าเดียว</h1>
+        <p class="hero-description noto-sans-thai-f">
+          ค้นหาด้วย keyword หรือ barcode ได้ทันที และเมื่อกดปุ่มแก้ไขจะมีตัวเลือก 3 ทางสำหรับแก้ข้อมูลทั่วไป นับจำนวนสินค้า และปรับต้นทุนต่อชิ้น
+        </p>
+      </div>
+
+      <div class="hero-stat-grid">
+        <div class="hero-stat-card">
+          <span class="hero-stat-label noto-sans-thai-f">วิธีค้นหา</span>
+          <strong class="hero-stat-value">2</strong>
+        </div>
+        <div class="hero-stat-card">
+          <span class="hero-stat-label noto-sans-thai-f">ทางเลือกแก้ไข</span>
+          <strong class="hero-stat-value">3</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="search-workspace">
+      <div class="search-panel">
+        <div class="panel-heading">
+          <p class="panel-kicker noto-sans-thai-f">Keyword Search</p>
+          <h2 class="panel-title noto-sans-thai-f">ค้นหาสินค้าด้วย keyword หรือ barcode</h2>
+        </div>
+
+        <div class="search-bar-row">
+          <label class="search-field search-field-grow">
+            <span class="noto-sans-thai-f">Keyword / Barcode</span>
+            <input
+              type="text"
+              class="noto-sans-thai-f"
+              placeholder="เช่น น้ำปลา, SKU-001, SPU-2026 หรือบาร์โค้ดสินค้า"
+              [(ngModel)]="searchKeyword"
+              [ngModelOptions]="{ standalone: true }"
+              (keyup.enter)="searchSavedProducts(searchKeyword())"
+            />
+          </label>
+
+          <button
+            type="button"
+            class="secondary-button noto-sans-thai-f search-scan-button"
+            (click)="openSearchScanner()"
+          >
+            สแกนบาร์โค้ด
+          </button>
+
+          <button
+            type="button"
+            class="primary-button noto-sans-thai-f search-submit-button"
+            (click)="searchSavedProducts(searchKeyword())"
+            [disabled]="isLoading()"
+          >
+            {{ isLoading() ? 'กำลังค้นหา...' : 'ค้นหา' }}
+          </button>
+        </div>
+
+        @if (lastScannedCode()) {
+          <div class="scan-summary noto-sans-thai-f">
+            บาร์โค้ดล่าสุด: <strong>{{ lastScannedCode() }}</strong>
+          </div>
+        }
+
+        <div class="search-result-panel">
+          <div class="result-header-row">
+            <div class="panel-heading">
+              <p class="panel-kicker noto-sans-thai-f">Search Result</p>
+              <h3 class="result-panel-title noto-sans-thai-f">รายการผลการค้นหาสินค้า</h3>
+            </div>
+            <button
+              type="button"
+              class="ghost-action clear-results-button noto-sans-thai-f"
+              (click)="clearSearchResults()"
+              [disabled]="searchedProducts().length === 0 && statusMessage() === '' && searchKeyword() === ''"
+            >
+              Clear
+            </button>
+          </div>
+
+          <div class="result-list-placeholder">
+            @if (statusMessage() !== '') {
+              <p class="status-message noto-sans-thai-f">{{ statusMessage() }}</p>
+            }
+
+            @for (product of searchedProducts(); track product.searchProductSpu + '-' + product.searchProductSku) {
+              <div class="result-card" [class.is-expanded]="expandedProductSku() === product.searchProductSku">
+                <div class="result-row">
+                  <div>
+                    <strong class="noto-sans-thai-f">{{ product.searchProductName }}</strong>
+                    <p class="result-meta">
+                      {{ product.searchProductSpu }} | {{ product.searchProductSku }} | Barcode
+                      {{ product.searchProductBarCode }}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    class="result-toggle-button noto-sans-thai-f"
+                    (click)="toggleEditPanel(product)"
+                    [attr.aria-expanded]="expandedProductSku() === product.searchProductSku"
+                    aria-label="เปิดรายละเอียดแก้ไขสินค้า"
+                  >
+                    <span aria-hidden="true">
+                      {{ expandedProductSku() === product.searchProductSku ? 'hide ▲' : 'to edit ▼' }}
+                    </span>
+                  </button>
+                </div>
+
+                @if (expandedProductSku() === product.searchProductSku) {
+                  @if (getSelectedEditOptionCount(product.searchProductSku) > 0) {
+                    <div class="edit-options-toolbar">
+                      <button
+                        type="button"
+                        class="primary-button result-save-button noto-sans-thai-f"
+                        (click)="saveSelectedOptions(product)"
+                      >
+                        save ({{ getSelectedEditOptionCount(product.searchProductSku) }})
+                      </button>
+                      <button
+                        type="button"
+                        class="result-toggle-button noto-sans-thai-f"
+                        (click)="toggleEditPanel(product)"
+                      >
+                        hide ▲
+                      </button>
+                    </div>
+                  }
+                  <div class="edit-options-grid">
+                    <section
+                      class="edit-option-card"
+                      [class.is-selected]="isEditOptionSelected(product.searchProductSku, 'option1')"
+                      (click)="toggleEditOption(product.searchProductSku, 'option1', $event)"
+                      (dblclick)="toggleEditOption(product.searchProductSku, 'option1', $event)"
+                    >
+                      <div class="edit-option-head">
+                        <div class="edit-option-label-row">
+                          <p class="panel-kicker noto-sans-thai-f">Option 1</p>
+                          <span
+                            class="edit-option-check noto-sans-thai-f"
+                            [class.is-visible]="isEditOptionSelected(product.searchProductSku, 'option1')"
+                            aria-hidden="true"
+                          >
+                            ✓
+                          </span>
+                        </div>
+                        <h4 class="noto-sans-thai-f">แก้ไขข้อมูลสินค้า</h4>
+                        <p class="edit-option-copy noto-sans-thai-f">
+                          ปรับข้อมูลทั่วไปของสินค้า ยกเว้นจำนวนสินค้าและต้นทุนต่อชิ้น
+                        </p>
+                      </div>
+
+                      <div class="edit-form-grid">
+                        <label class="search-field">
+                          <span class="noto-sans-thai-f">Product SPU</span>
+                          <input
+                            type="text"
+                            class="noto-sans-thai-f"
+                            [ngModel]="editDrafts()[product.searchProductSku].productSpu"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="updateDraftField(product.searchProductSku, 'productSpu', $event)"
+                          />
+                        </label>
+
+                        <label class="search-field">
+                          <span class="noto-sans-thai-f">Product SKU</span>
+                          <input
+                            type="text"
+                            class="noto-sans-thai-f"
+                            [ngModel]="editDrafts()[product.searchProductSku].productSku"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="updateDraftField(product.searchProductSku, 'productSku', $event)"
+                          />
+                        </label>
+
+                        <label class="search-field edit-field-full">
+                          <span class="noto-sans-thai-f">ชื่อสินค้า</span>
+                          <input
+                            type="text"
+                            class="noto-sans-thai-f"
+                            [ngModel]="editDrafts()[product.searchProductSku].productName"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="updateDraftField(product.searchProductSku, 'productName', $event)"
+                          />
+                        </label>
+
+                        <label class="search-field">
+                          <span class="noto-sans-thai-f">หน่วยนับ</span>
+                          <input
+                            type="text"
+                            class="noto-sans-thai-f"
+                            [ngModel]="editDrafts()[product.searchProductSku].unitOfMeasure"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="updateDraftField(product.searchProductSku, 'unitOfMeasure', $event)"
+                          />
+                        </label>
+
+                        <label class="search-field">
+                          <span class="noto-sans-thai-f">ราคาขายต่อหน่วย</span>
+                          <input
+                            type="number"
+                            class="noto-sans-thai-f"
+                            [ngModel]="editDrafts()[product.searchProductSku].productSellingPricePerUnit"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="updateDraftField(product.searchProductSku, 'productSellingPricePerUnit', +$event)"
+                          />
+                        </label>
+
+                        <label class="search-field edit-field-full">
+                          <span class="noto-sans-thai-f">Barcode</span>
+                          <input
+                            type="text"
+                            class="noto-sans-thai-f"
+                            [ngModel]="editDrafts()[product.searchProductSku].productBarCode"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="updateDraftField(product.searchProductSku, 'productBarCode', $event)"
+                          />
+                        </label>
+
+                        <label class="search-field">
+                          <span class="noto-sans-thai-f">วันที่รับสินค้า</span>
+                          <input
+                            type="date"
+                            class="noto-sans-thai-f"
+                            [ngModel]="editDrafts()[product.searchProductSku].receivedDate"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="updateDraftField(product.searchProductSku, 'receivedDate', $event)"
+                          />
+                        </label>
+
+                        <label class="search-field">
+                          <span class="noto-sans-thai-f">วันหมดอายุ</span>
+                          <input
+                            type="date"
+                            class="noto-sans-thai-f"
+                            [ngModel]="editDrafts()[product.searchProductSku].expiredDate"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="updateDraftField(product.searchProductSku, 'expiredDate', $event)"
+                          />
+                        </label>
+                      </div>
+                    </section>
+
+                    <section
+                      class="edit-option-card"
+                      [class.is-selected]="isEditOptionSelected(product.searchProductSku, 'option2')"
+                      (click)="toggleEditOption(product.searchProductSku, 'option2', $event)"
+                      (dblclick)="toggleEditOption(product.searchProductSku, 'option2', $event)"
+                    >
+                      <div class="edit-option-head">
+                        <div class="edit-option-label-row">
+                          <p class="panel-kicker noto-sans-thai-f">Option 2</p>
+                          <span
+                            class="edit-option-check noto-sans-thai-f"
+                            [class.is-visible]="isEditOptionSelected(product.searchProductSku, 'option2')"
+                            aria-hidden="true"
+                          >
+                            ✓
+                          </span>
+                        </div>
+                        <h4 class="noto-sans-thai-f">นับและแก้จำนวนสินค้า</h4>
+                        <p class="edit-option-copy noto-sans-thai-f">
+                          กรอกจำนวนเอง หรือใช้กล้องสแกนบาร์โค้ดชิ้นสินค้าเพื่อเพิ่มจำนวนทีละ 1
+                        </p>
+                      </div>
+
+                      <div class="count-toolbox">
+                        <button
+                          type="button"
+                          class="ghost-button noto-sans-thai-f"
+                          (click)="decreaseCount(product.searchProductSku)"
+                        >
+                          -1
+                        </button>
+                        <label class="search-field count-field">
+                          <span class="noto-sans-thai-f">จำนวนสินค้า</span>
+                          <input
+                            type="number"
+                            min="0"
+                            class="noto-sans-thai-f"
+                            [ngModel]="editDrafts()[product.searchProductSku].productAmount"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="updateDraftField(product.searchProductSku, 'productAmount', +$event)"
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          class="ghost-button noto-sans-thai-f"
+                          (click)="increaseCount(product.searchProductSku)"
+                        >
+                          +1
+                        </button>
+                      </div>
+
+                      <div class="count-action-row">
+                        <button
+                          type="button"
+                          class="secondary-button noto-sans-thai-f"
+                          (click)="openCountScanner(product)"
+                        >
+                          สแกนเพื่อนับสินค้า
+                        </button>
+                        <span class="scanner-status-pill noto-sans-thai-f">
+                          จำนวนปัจจุบัน {{ editDrafts()[product.searchProductSku].productAmount }}
+                        </span>
+                      </div>
+                    </section>
+                    @if (ceoAuthorities().length > 0) {
+                      <section
+                        class="edit-option-card"
+                        [class.is-selected]="isEditOptionSelected(product.searchProductSku, 'option3')"
+                        (click)="toggleEditOption(product.searchProductSku, 'option3', $event)"
+                        (dblclick)="toggleEditOption(product.searchProductSku, 'option3', $event)"
+                      >
+                        <div class="edit-option-head">
+                          <div class="edit-option-label-row">
+                            <p class="panel-kicker noto-sans-thai-f">Option 3</p>
+                            <span
+                              class="edit-option-check noto-sans-thai-f"
+                              [class.is-visible]="isEditOptionSelected(product.searchProductSku, 'option3')"
+                              aria-hidden="true"
+                            >
+                              ✓
+                            </span>
+                          </div>
+                          <h4 class="noto-sans-thai-f">แก้ต้นทุนต่อชิ้น</h4>
+                          <p class="edit-option-copy noto-sans-thai-f">
+                            ใช้ช่องนี้สำหรับปรับต้นทุนต่อชิ้นของสินค้าแยกจากข้อมูลทั่วไป
+                          </p>
+                        </div>
+
+                        <label class="search-field">
+                          <span class="noto-sans-thai-f">ต้นทุนต่อชิ้น</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            class="noto-sans-thai-f"
+                            [ngModel]="editDrafts()[product.searchProductSku].productCostPricePerUnit"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="updateDraftField(product.searchProductSku, 'productCostPricePerUnit', +$event)"
+                          />
+                        </label>
+                      </section>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          @if (totalPages() > 1) {
+            <div class="toolbar-row">
+              <button
+                type="button"
+                class="ghost-action pagination-button noto-sans-thai-f"
+                (click)="goToPage(page() - 1)"
+                [disabled]="page() === 0 || isLoading()"
+              >
+                <span class="pagination-arrow" aria-hidden="true">←</span>
+                <span>Prev</span>
+              </button>
+              <span class="page-indicator noto-sans-thai-f">Page {{ page() + 1 }} / {{ totalPages() }}</span>
+              <button
+                type="button"
+                class="ghost-action pagination-button noto-sans-thai-f"
+                (click)="goToPage(page() + 1)"
+                [disabled]="page() >= totalPages() - 1 || isLoading()"
+              >
+                <span>Next</span>
+                <span class="pagination-arrow" aria-hidden="true">→</span>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+  </div>
+
+  @if (isScannerOpen()) {
+    <div class="scanner-overlay" (click)="closeScanner()">
+      <div class="scanner-modal" (click)="$event.stopPropagation()">
+        <div class="scanner-modal-header">
+          <div>
+            <h4 class="noto-sans-thai-f">
+              {{ scannerMode() === 'count' ? 'สแกนบาร์โค้ดเพื่อนับจำนวนสินค้า' : 'สแกนบาร์โค้ดเพื่อค้นหาสินค้า' }}
+            </h4>
+            <p class="scanner-helper noto-sans-thai-f">
+              {{
+                scannerMode() === 'count'
+                  ? 'สแกนบาร์โค้ดของสินค้าชิ้นเดิมซ้ำได้ ระบบจะเพิ่มจำนวนให้ทีละ 1'
+                  : 'จัดบาร์โค้ดให้อยู่ในกรอบ กล้องจะอ่านค่าแล้วค้นหาสินค้าให้อัตโนมัติ'
+              }}
+            </p>
+          </div>
+          <button type="button" class="ghost-button noto-sans-thai-f" (click)="closeScanner()">ปิด</button>
+        </div>
+
+        @if (scannerError()) {
+          <div class="scanner-error noto-sans-thai-f">{{ scannerError() }}</div>
+        }
+
+        <div class="scanner-status-pill noto-sans-thai-f">{{ scannerStatus() }}</div>
+        <div id="find-product-qr-reader"></div>
+      </div>
+    </div>
+  }
+</section>

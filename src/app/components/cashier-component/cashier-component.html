@@ -1,0 +1,508 @@
+<section class="cashier-shell">
+  <nav class="cashier-nav">
+    <div class="nav-brand">
+      <span class="nav-eyebrow noto-sans-thai-f">TongGaw Checkout</span>
+      <div class="nav-title noto-sans-thai-f">Cashier and Payment</div>
+    </div>
+
+    <ul class="nav-links">
+      <li>
+        <a
+          class="nav-link noto-sans-thai-f"
+          routerLink="/home"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          Home
+        </a>
+      </li>
+      <li>
+        <a class="nav-link noto-sans-thai-f" routerLink="/find-product" routerLinkActive="is-active">
+          Find Product
+        </a>
+      </li>
+      <li>
+        <button type="button" class="nav-link nav-link-danger noto-sans-thai-f" (click)="logout()">
+          Logout
+        </button>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="cashier-page">
+    <section class="cashier-hero">
+      <div class="hero-copy">
+        <p class="hero-kicker noto-sans-thai-f">Cashier Workspace</p>
+        <h1 class="hero-title noto-sans-thai-f">Scan products, collect cash, and save the sale</h1>
+        <p class="hero-description noto-sans-thai-f">
+          This page builds the cart from barcode input, calculates the total, receives customer cash,
+          and saves the completed sale into the database.
+        </p>
+      </div>
+
+      <div class="hero-stat-grid">
+        <article class="hero-stat-card">
+          <span class="hero-stat-label noto-sans-thai-f">Items In Cart</span>
+          <strong class="hero-stat-value">{{ totalItems() }}</strong>
+        </article>
+        <article class="hero-stat-card">
+          <span class="hero-stat-label noto-sans-thai-f">Subtotal</span>
+          <strong class="hero-stat-value">{{ subtotal() | currency:'THB':'symbol':'1.2-2' }}</strong>
+        </article>
+      </div>
+    </section>
+
+    @if (statusMessage() !== '') {
+      <p class="status-message noto-sans-thai-f">{{ statusMessage() }}</p>
+    }
+
+    <section class="cashier-layout">
+      <article class="cashier-panel scan-panel">
+        <div class="panel-heading">
+          <p class="panel-kicker noto-sans-thai-f">Step 1</p>
+          <h2 class="panel-title noto-sans-thai-f">Add Product To Cart</h2>
+          <p class="panel-copy noto-sans-thai-f">
+            Choose either manual barcode entry or camera scanning to add products.
+          </p>
+        </div>
+
+        <div class="entry-mode-grid">
+          <article class="entry-mode-card">
+            <div class="entry-mode-head">
+              <p class="entry-mode-kicker noto-sans-thai-f">Manual Entry</p>
+              <h3 class="entry-mode-title noto-sans-thai-f">Enter Barcode</h3>
+              <p class="entry-mode-copy noto-sans-thai-f">
+                Type a barcode manually and press Enter or click the action button.
+              </p>
+            </div>
+
+            <div class="scan-entry-row">
+              <label class="search-field search-field-grow">
+                <span class="noto-sans-thai-f">Barcode</span>
+                <input
+                  type="text"
+                  class="noto-sans-thai-f"
+                  [ngModel]="barcodeInput()"
+                  [ngModelOptions]="{ standalone: true }"
+                  (ngModelChange)="barcodeInput.set($event)"
+                  (keyup.enter)="addManualBarcodeToCart()"
+                  placeholder="Example: 8850123456789"
+                />
+              </label>
+
+              <button
+                type="button"
+                class="primary-button noto-sans-thai-f"
+                (click)="addManualBarcodeToCart()"
+                [disabled]="isLoading()"
+              >
+                {{ isLoading() ? 'Adding...' : 'Add To Cart' }}
+              </button>
+            </div>
+          </article>
+
+          <article class="entry-mode-card entry-mode-card-scan">
+            <div class="entry-mode-head">
+              <p class="entry-mode-kicker noto-sans-thai-f">Barcode Scan</p>
+              <h3 class="entry-mode-title noto-sans-thai-f">Use Camera</h3>
+              <p class="entry-mode-copy noto-sans-thai-f">
+                Open the camera and scan a product barcode to add it automatically.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="secondary-button scan-open-button noto-sans-thai-f"
+              (click)="openScanner()"
+              [disabled]="isLoading()"
+            >
+              Open Scanner
+            </button>
+          </article>
+        </div>
+
+        <div class="scan-help-card">
+          <p class="scan-help-title noto-sans-thai-f">Quick Notes</p>
+          <ul class="scan-help-list noto-sans-thai-f">
+            <li>Scanning the same product again increases its quantity in the cart.</li>
+            <li>Only cash payment is enabled right now.</li>
+            <li>Checkout saves both the sale bill and sale items into the database.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="cashier-panel cart-panel">
+        <div class="panel-heading">
+          <p class="panel-kicker noto-sans-thai-f">Step 2</p>
+          <h2 class="panel-title noto-sans-thai-f">Cart</h2>
+          <p class="panel-copy noto-sans-thai-f">
+            Review quantity and remove unwanted items before checkout.
+          </p>
+        </div>
+
+        <div class="cart-list">
+          @if (cartItems().length === 0) {
+            <div class="empty-state noto-sans-thai-f">
+              No items in cart yet. Start by entering or scanning a barcode.
+            </div>
+          } @else {
+            @for (item of cartItems(); track item.productSku) {
+              <article class="cart-item-card">
+                <div class="cart-item-head">
+                  <div>
+                    <strong class="noto-sans-thai-f">{{ item.productName }}</strong>
+                    <p class="cart-item-meta noto-sans-thai-f">
+                      {{ item.productSpu }} | {{ item.productSku }} | Barcode {{ item.barcode }}
+                    </p>
+                  </div>
+                  <button type="button" class="ghost-action remove-button noto-sans-thai-f" (click)="removeCartItem(item.productSku)">
+                    Remove
+                  </button>
+                </div>
+
+                <div class="cart-item-body">
+                  <div class="price-block">
+                    <span class="price-label noto-sans-thai-f">Unit Price</span>
+                    <strong>{{ item.sellingPricePerUnit | currency:'THB':'symbol':'1.2-2' }}</strong>
+                  </div>
+
+                  <div class="cart-quantity-tools">
+                    <div class="qty-stepper">
+                      <button type="button" class="ghost-button noto-sans-thai-f" (click)="decreaseQuantity(item.productSku)">-1</button>
+                      <div class="qty-pill noto-sans-thai-f">
+                        {{ getDisplayedCartQuantity(item.productSku, item.quantity, item.availableAmount) }}
+                        {{ item.unitOfMeasure || 'pcs' }}
+                      </div>
+                      <button
+                        type="button"
+                        class="ghost-button noto-sans-thai-f"
+                        (click)="increaseQuantity(item.productSku)"
+                        [disabled]="getDisplayedCartQuantity(item.productSku, item.quantity, item.availableAmount) >= item.availableAmount"
+                      >
+                        +1
+                      </button>
+                    </div>
+
+                    <label class="search-field cart-qty-input">
+                      <span class="noto-sans-thai-f">Quantity</span>
+                      <input
+                        type="number"
+                        min="0"
+                        class="noto-sans-thai-f"
+                        [ngModel]="getCartQuantityDraft(item.productSku, item.quantity)"
+                        [ngModelOptions]="{ standalone: true }"
+                        (ngModelChange)="updateCartQuantityDraft(item.productSku, $event)"
+                        (blur)="commitCartQuantity(item.productSku)"
+                        (keyup.enter)="commitCartQuantity(item.productSku)"
+                        (wheel)="preventNumberInputWheel($event)"
+                      />
+                    </label>
+
+                    <button
+                      type="button"
+                      class="secondary-button count-scan-button noto-sans-thai-f"
+                      (click)="openCountScanner(item)"
+                    >
+                      Scan To Count
+                    </button>
+                  </div>
+
+                  <div class="cart-discount-card">
+                    <div class="cart-discount-head">
+                      <span class="price-label noto-sans-thai-f">Sale Item Discount</span>
+                    </div>
+
+                    <div class="cart-discount-controls">
+                      <div class="discount-type-grid line-discount-grid">
+                        <button
+                          type="button"
+                          class="discount-type-button noto-sans-thai-f"
+                          [class.is-active]="item.discountType === 'NONE'"
+                          (click)="setCartItemDiscountType(item.productSku, 'NONE')"
+                        >
+                          No Discount
+                        </button>
+                        <button
+                          type="button"
+                          class="discount-type-button noto-sans-thai-f"
+                          [class.is-active]="item.discountType === 'AMOUNT'"
+                          (click)="setCartItemDiscountType(item.productSku, 'AMOUNT')"
+                        >
+                          Amount
+                        </button>
+                        <button
+                          type="button"
+                          class="discount-type-button noto-sans-thai-f"
+                          [class.is-active]="item.discountType === 'PERCENT'"
+                          (click)="setCartItemDiscountType(item.productSku, 'PERCENT')"
+                        >
+                          Percent
+                        </button>
+                      </div>
+
+                      @if (item.discountType !== 'NONE') {
+                        <label class="search-field cart-discount-input">
+                          <span class="noto-sans-thai-f">
+                            {{ item.discountType === 'PERCENT' ? 'Discount Percent' : 'Discount Amount' }}
+                          </span>
+                          <input
+                            type="number"
+                            min="0"
+                            [max]="item.discountType === 'PERCENT' ? 100 : null"
+                            class="noto-sans-thai-f"
+                            [ngModel]="item.discountValue"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="updateCartItemDiscountValue(item.productSku, $event)"
+                            (wheel)="preventNumberInputWheel($event)"
+                          />
+                        </label>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="price-block price-block-total">
+                    <span class="price-label noto-sans-thai-f">Sale Item Summary</span>
+                    <div class="line-summary-grid noto-sans-thai-f">
+                      <span>Gross: {{ getCartItemGrossTotal(item) | currency:'THB':'symbol':'1.2-2' }}</span>
+                      <span>Discount: -{{ getCartItemDiscountAmount(item) | currency:'THB':'symbol':'1.2-2' }}</span>
+                      <span>Net Unit: {{ getCartItemNetUnitPrice(item) | currency:'THB':'symbol':'1.2-2' }}</span>
+                    </div>
+                    <strong>{{ getCartItemLineTotal(item) | currency:'THB':'symbol':'1.2-2' }}</strong>
+                  </div>
+                </div>
+              </article>
+            }
+          }
+        </div>
+
+        <div class="cart-footer">
+          <button type="button" class="ghost-action noto-sans-thai-f" (click)="clearCart()" [disabled]="cartItems().length === 0">
+            Clear Cart
+          </button>
+        </div>
+      </article>
+
+      <article class="cashier-panel payment-panel">
+        <div class="panel-heading">
+          <p class="panel-kicker noto-sans-thai-f">Step 3</p>
+          <h2 class="panel-title noto-sans-thai-f">Payment</h2>
+          <p class="panel-copy noto-sans-thai-f">
+            Review totals, receive cash, then save the sale into the database.
+          </p>
+        </div>
+
+        <div class="payment-method-grid">
+          <button
+            type="button"
+            class="payment-method-card noto-sans-thai-f"
+            [class.is-active]="paymentMethod() === 'cash'"
+            (click)="setPaymentMethod('cash')"
+          >
+            <span class="method-label">Cash</span>
+            <strong class="method-status">Enabled</strong>
+          </button>
+
+          <button
+            type="button"
+            class="payment-method-card is-disabled noto-sans-thai-f"
+            aria-disabled="true"
+            (click)="setPaymentMethod('transfer')"
+          >
+            <span class="method-label">Transfer</span>
+            <strong class="method-status">Disabled For Now</strong>
+          </button>
+        </div>
+
+        <div class="payment-summary-card">
+          <div class="summary-row">
+            <span class="noto-sans-thai-f">Total Quantity</span>
+            <strong>{{ totalItems() }}</strong>
+          </div>
+          <div class="summary-row">
+            <span class="noto-sans-thai-f">Subtotal</span>
+            <strong class="summary-total">{{ subtotal() | currency:'THB':'symbol':'1.2-2' }}</strong>
+          </div>
+        </div>
+
+        <div class="discount-card">
+          <div class="discount-head">
+            <p class="panel-kicker noto-sans-thai-f">Discount</p>
+            <p class="panel-copy noto-sans-thai-f">
+              Apply a bill discount before receiving customer cash.
+            </p>
+          </div>
+
+          <div class="discount-type-grid">
+            <button
+              type="button"
+              class="discount-type-button noto-sans-thai-f"
+              [class.is-active]="billDiscountType() === 'NONE'"
+              (click)="setBillDiscountType('NONE')"
+            >
+              No Discount
+            </button>
+            <button
+              type="button"
+              class="discount-type-button noto-sans-thai-f"
+              [class.is-active]="billDiscountType() === 'AMOUNT'"
+              (click)="setBillDiscountType('AMOUNT')"
+            >
+              Discount Amount
+            </button>
+            <button
+              type="button"
+              class="discount-type-button noto-sans-thai-f"
+              [class.is-active]="billDiscountType() === 'PERCENT'"
+              (click)="setBillDiscountType('PERCENT')"
+            >
+              Discount Percent
+            </button>
+          </div>
+
+          @if (billDiscountType() !== 'NONE') {
+            <label class="cash-field">
+              <span class="noto-sans-thai-f">
+                {{ billDiscountType() === 'PERCENT' ? 'Discount Percent' : 'Discount Amount' }}
+              </span>
+              <input
+                type="number"
+                min="0"
+                [max]="billDiscountType() === 'PERCENT' ? 100 : null"
+                class="noto-sans-thai-f"
+                [ngModel]="discountInput()"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="updateDiscountInput($event)"
+                [placeholder]="billDiscountType() === 'PERCENT' ? 'Example: 10' : 'Example: 20'"
+              />
+            </label>
+          }
+
+          <div class="summary-row discount-summary-row">
+            <span class="noto-sans-thai-f">Calculated Discount</span>
+            <strong class="discount-value">-{{ discountAmount() | currency:'THB':'symbol':'1.2-2' }}</strong>
+          </div>
+
+          <div class="summary-row grand-total-row">
+            <span class="noto-sans-thai-f">Grand Total</span>
+            <strong class="summary-total">{{ grandTotal() | currency:'THB':'symbol':'1.2-2' }}</strong>
+          </div>
+        </div>
+
+        <label class="cash-field">
+          <span class="noto-sans-thai-f">Received Cash</span>
+          <input
+            type="number"
+            min="0"
+            class="noto-sans-thai-f"
+            [ngModel]="receivedCashInput()"
+            [ngModelOptions]="{ standalone: true }"
+            (ngModelChange)="updateReceivedCash($event)"
+            (wheel)="preventNumberInputWheel($event)"
+            placeholder="Example: 500"
+          />
+        </label>
+
+        <label class="cash-field">
+          <span class="noto-sans-thai-f">Sale Note</span>
+          <textarea
+            class="noto-sans-thai-f"
+            [ngModel]="saleNoteInput()"
+            [ngModelOptions]="{ standalone: true }"
+            (ngModelChange)="updateSaleNote($event)"
+            rows="3"
+            placeholder="Add an optional note for this sale"
+          ></textarea>
+        </label>
+
+        <div class="payment-result-grid">
+          <article class="result-card">
+            <span class="result-label noto-sans-thai-f">Received</span>
+            <strong>{{ receivedCash() | currency:'THB':'symbol':'1.2-2' }}</strong>
+          </article>
+          <article class="result-card">
+            <span class="result-label noto-sans-thai-f">Discount</span>
+            <strong class="discount-value">-{{ discountAmount() | currency:'THB':'symbol':'1.2-2' }}</strong>
+          </article>
+          <article class="result-card">
+            <span class="result-label noto-sans-thai-f">Change</span>
+            <strong class="result-positive">{{ changeAmount() | currency:'THB':'symbol':'1.2-2' }}</strong>
+          </article>
+          <article class="result-card result-card-alert">
+            <span class="result-label noto-sans-thai-f">Remaining</span>
+            <strong>{{ remainingAmount() | currency:'THB':'symbol':'1.2-2' }}</strong>
+          </article>
+          <article class="result-card result-card-total">
+            <span class="result-label noto-sans-thai-f">Grand Total</span>
+            <strong>{{ grandTotal() | currency:'THB':'symbol':'1.2-2' }}</strong>
+          </article>
+        </div>
+
+        <div class="checkout-actions">
+          <button
+            type="button"
+            class="primary-button checkout-button noto-sans-thai-f"
+            (click)="checkoutCart()"
+            [disabled]="!canCheckout()"
+          >
+            {{ isLoading() ? 'Saving Sale...' : 'Checkout And Save Sale' }}
+          </button>
+        </div>
+
+        @if (lastCompletedSale()) {
+          <div class="sale-success-card">
+            <p class="panel-kicker noto-sans-thai-f">Latest Saved Sale</p>
+            <div class="summary-row">
+              <span class="noto-sans-thai-f">Sale ID</span>
+              <strong>#{{ lastCompletedSale()!.saleId }}</strong>
+            </div>
+            <div class="summary-row">
+              <span class="noto-sans-thai-f">Discount</span>
+              <strong>-{{ lastCompletedSale()!.billDiscountAmount | currency:'THB':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="summary-row">
+              <span class="noto-sans-thai-f">Grand Total</span>
+              <strong>{{ lastCompletedSale()!.grandTotal | currency:'THB':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="summary-row">
+              <span class="noto-sans-thai-f">Received</span>
+              <strong>{{ lastCompletedSale()!.receivedAmount | currency:'THB':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="summary-row">
+              <span class="noto-sans-thai-f">Change</span>
+              <strong>{{ lastCompletedSale()!.changeAmount | currency:'THB':'symbol':'1.2-2' }}</strong>
+            </div>
+          </div>
+        }
+      </article>
+    </section>
+  </div>
+
+  @if (isScannerOpen()) {
+    <div class="scanner-overlay" (click)="closeScanner()">
+      <div class="scanner-modal" (click)="$event.stopPropagation()">
+        <div class="scanner-modal-header">
+          <div>
+            <h4 class="noto-sans-thai-f">
+              {{ scannerMode() === 'count' ? 'Scan To Count Product' : 'Scan Product Barcode' }}
+            </h4>
+            <p class="scanner-helper noto-sans-thai-f">
+              {{
+                scannerMode() === 'count'
+                  ? 'Scan the matching barcode again to increase the quantity of the selected cart item.'
+                  : 'Point the camera at a product barcode to add it to the cart.'
+              }}
+            </p>
+          </div>
+          <button type="button" class="ghost-button noto-sans-thai-f" (click)="closeScanner()">Close</button>
+        </div>
+
+        @if (scannerError()) {
+          <div class="scanner-error noto-sans-thai-f">{{ scannerError() }}</div>
+        }
+
+        <div class="scanner-status-pill noto-sans-thai-f">{{ scannerStatus() }}</div>
+        <div id="cashier-qr-reader"></div>
+      </div>
+    </div>
+  }
+</section>

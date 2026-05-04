@@ -1,0 +1,214 @@
+<section class="add-product-shell">
+  <nav class="nav-bar-cls">
+    <div class="nav-brand">
+      <span class="nav-eyebrow noto-sans-thai-f">Inventory Workspace</span>
+      <div class="nav-title noto-sans-thai-f">ตองเก้า</div>
+    </div>
+
+    <ul id="add-product-nav-ul">
+      <li>
+        <a
+          class="nav-link noto-sans-thai-f"
+          routerLink="/home"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          กลับหน้าหลัก
+        </a>
+      </li>
+      <li>
+        <a
+          class="nav-link noto-sans-thai-f"
+          routerLink="/cashier"
+          routerLinkActive="is-active"
+        >
+          ไปหน้าคิดเงิน
+        </a>
+      </li>
+      <li class="nav-logout-item">
+        <button
+          type="button"
+          id="add-product-logout"
+          class="nav-link nav-link-danger noto-sans-thai-f"
+          (click)="logout()"
+        >
+          ออกจากระบบ
+        </button>
+      </li>
+    </ul>
+  </nav>
+
+  <form class="add-product-grid-layout-container" [formRoot]="productForm">
+    <div class="add-product-header">
+      <p class="header-kicker noto-sans-thai-f">Product Setup</p>
+      <h2 class="noto-sans-thai-f">กรอกข้อมูลสินค้าใหม่ให้ครบก่อนบันทึกเข้าคลัง</h2>
+      <p class="header-subtitle noto-sans-thai-f">
+        ระบุรหัสสินค้า ชื่อสินค้า ราคา วันสำคัญ และบาร์โค้ด เพื่อให้ระบบพร้อมนำสินค้าไปใช้งานต่อได้ทันที
+      </p>
+    </div>
+
+    <div class="add-product-content">
+      <div class="add-product-details">
+        <section class="detail-section">
+          <h3 class="section-title noto-sans-thai-f">ข้อมูลหลักสำหรับสินค้า</h3>
+          <div class="field-grid">
+            <label class="field">
+              <span class="noto-sans-thai-f">Product SPU</span>
+              <input placeholder="SPU-2026-001" [formField]="productForm.productSpu"/>
+            </label>
+
+            <label class="field">
+              <span class="noto-sans-thai-f">Product SKU</span>
+              <input placeholder="SKU-APPLE-001" [formField]="productForm.productSku"/>
+            </label>
+
+            <label class="field field-full">
+              <span class="noto-sans-thai-f">ชื่อสินค้า</span>
+              <input placeholder="เช่น แอปเปิลแดง น้ำปลา ขนมขบเคี้ยว หรือสินค้าอุปโภคบริโภคอื่น ๆ" 
+              [formField]="productForm.productName"/>
+            </label>
+
+            <label class="field">
+              <span class="noto-sans-thai-f">หน่วยนับ</span>
+              <input placeholder="ชิ้น / แพ็ค / กล่อง / ขวด" [formField]="productForm.unitOfMeasure"/>
+            </label>
+
+            <label class="field">
+              <span class="noto-sans-thai-f">ราคาขายต่อหน่วย</span>
+              <input type="number" placeholder="0.00" [formField]="productForm.productSellingPricePerUnit" />
+            </label>
+          </div>
+        </section>
+
+        <section class="detail-section">
+          <h3 class="section-title noto-sans-thai-f">วันสำคัญที่เกี่ยวข้องกับสินค้า</h3>
+          <div class="date-grid">
+            <div class="date-card">
+              <div class="date-card-head">
+                <h4 class="noto-sans-thai-f">วันที่รับเข้าสินค้า</h4>
+                <button type="button" 
+                        class="toggle-switch toggle-switch-compact noto-sans-thai-f"
+                        role="switch"
+                        [attr.aria-checked]="noReceivedDate()"
+                        [class.is-active]="noReceivedDate()"
+                        (click)="toggleNoReceivedDate()"
+                >
+                  <span class="toggle-switch-slider" aria-hidden="true"></span>
+                  <span class="toggle-switch-text">ไม่มีข้อมูล</span>
+                </button>
+              </div>
+              @if(!noReceivedDate()) {
+                <label class="field">
+                    <span class="noto-sans-thai-f">Received Date</span>
+                    <input type="date" [formField]="productForm.receivedDate" />
+                </label>
+             }
+            </div>
+
+            <div class="date-card">
+              <div class="date-card-head">
+                <h4 class="noto-sans-thai-f">วันหมดอายุสินค้า</h4>
+                <button type="button" class="toggle-switch toggle-switch-compact noto-sans-thai-f"
+                        role="switch"
+                        [attr.aria-checked]="noExpiredDate()"
+                        [class.is-active]="noExpiredDate()"
+                        (click)="toggleNoExpiredDate()"
+                >
+                  <span class="toggle-switch-slider" aria-hidden="true"></span>
+                  <span class="toggle-switch-text">ไม่มีข้อมูล</span>
+                </button>
+              </div>
+              @if(!noExpiredDate()) {
+                <label class="field">
+                    <span class="noto-sans-thai-f">Expired Date</span>
+                    <input type="date" [formField]="productForm.expiredDate"/>
+
+                </label>
+              }
+            </div>
+          </div>
+        </section>
+
+        <section class="detail-section">
+          <div class="barcode-head">
+            <div>
+              <h3 class="section-title noto-sans-thai-f">ข้อมูลบาร์โค้ดสินค้า</h3>
+              <p class="barcode-copy noto-sans-thai-f">
+                สแกนบาร์โค้ดด้วยกล้องเพื่อกรอกข้อมูลอัตโนมัติ หรือพิมพ์รหัสเองหากมีข้อมูลอยู่แล้ว
+                ระบบจะใช้รหัสนี้สำหรับค้นหาและนับสต็อกสินค้าในขั้นตอนถัดไป
+              </p>
+            </div>
+          </div>
+
+          <div class="barcode-actions">
+            <button type="button" class="secondary-button noto-sans-thai-f" (click)="openScanner()">
+              {{ hasBarcodeValue ? 'สแกนบาร์โค้ดใหม่' : 'เปิดกล้องเพื่อสแกนบาร์โค้ด' }}
+            </button>
+            <button type="button" class="ghost-button noto-sans-thai-f" (click)="clearBarcode()">
+              ล้างค่าบาร์โค้ด
+            </button>
+          </div>
+
+          <div class="field-grid">
+            <label class="field field-full">
+              <span class="noto-sans-thai-f" id="barcodeId">Barcode</span>
+              <input placeholder="กรอกหมายเลขบาร์โค้ด หรือใช้กล้องสแกนด้านบน" autocomplete="off" [formField]="productForm.productBarCode" />
+            </label>
+          </div>
+
+          <div class="scan-status">
+            <p class="noto-sans-thai-f">สถานะการสแกน: ยังไม่ได้เชื่อมกับตัวสแกน</p>
+            <p class="noto-sans-thai-f">รหัสล่าสุด: ยังไม่มีบาร์โค้ดที่สแกนหรือกรอกไว้</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div class="add-product-footer">
+      <div class="footer-row">
+        <div>
+          <h4 class="noto-sans-thai-f">พร้อมตรวจสอบก่อนบันทึกสินค้าใหม่</h4>
+          <p class="footer-copy noto-sans-thai-f">
+            ตอนนี้ส่วนแสดงผลหน้านี้ยังไม่ผูกกับฟอร์ม, scanner หรือ API เพื่อให้แยกจัดโครงสร้างหน้าได้ก่อน
+          </p>
+        </div>
+      </div>
+      @if (hasErrorMessage) {
+        <div class="scanner-error noto-sans-thai-f">{{ errorMessage() }}</div>
+      }
+
+      <div class="footer-actions">
+        <a class="ghost-button noto-sans-thai-f" id="cancelId">ล้างข้อมูลทั้งหมด</a>
+        <button type="submit" class="primary-button noto-sans-thai-f" [disabled]="productForm().submitting()">
+            @if (productForm().submitting()) {
+                กำลังบันทึก...
+            } @else {
+                บันทึกสินค้าใหม่
+            }
+        </button>
+      </div>
+    </div>
+  </form>
+  @if (isScannerOpen()) {
+    <div class="scanner-overlay" (click)="closeScanner()">
+      <div class="scanner-modal" (click)="$event.stopPropagation()">
+        <div class="scanner-modal-header">
+          <div>
+            <h4 class="noto-sans-thai-f">สแกนบาร์โค้ดสินค้า</h4>
+            <p class="noto-sans-thai-f">
+              จัดบาร์โค้ดให้อยู่ในกรอบ กล้องจะอ่านข้อมูลและนำรหัสไปกรอกให้อัตโนมัติ
+            </p>
+          </div>
+          <button type="button" class="ghost-button noto-sans-thai-f" (click)="closeScanner()">ปิด</button>
+        </div>
+
+        @if (scannerError()) {
+          <div class="scanner-error noto-sans-thai-f">{{ scannerError() }}</div>
+        }
+
+        <div id="qr-reader"></div>
+      </div>
+    </div>
+  }
+
+</section>

@@ -1,0 +1,322 @@
+<section class="report-shell">
+  <nav class="report-nav">
+    <div class="nav-brand">
+      <span class="nav-eyebrow noto-sans-thai-f">CEO Workspace</span>
+      <div class="nav-title noto-sans-thai-f">Daily Sales Report</div>
+    </div>
+
+    <ul class="nav-links">
+      <li>
+        <a
+          class="nav-link noto-sans-thai-f"
+          routerLink="/home"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          Home
+        </a>
+      </li>
+      <li>
+        <a class="nav-link noto-sans-thai-f" routerLink="/find-product" routerLinkActive="is-active">
+          Inventory
+        </a>
+      </li>
+      <li>
+        <button type="button" class="nav-link nav-link-danger noto-sans-thai-f" (click)="logout()">
+          Logout
+        </button>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="report-page">
+    <section class="report-hero">
+      <div class="hero-copy">
+        <p class="hero-kicker noto-sans-thai-f">Sales And Inventory</p>
+        <h1 class="hero-title noto-sans-thai-f">Review stock, cost, revenue, and sale bills</h1>
+        <p class="hero-description noto-sans-thai-f">
+          Search products by keyword or barcode, review remaining quantity and cost, then inspect saved sales.
+        </p>
+      </div>
+
+      <div class="hero-stat-grid">
+        <article class="stat-card">
+          <span class="stat-label noto-sans-thai-f">Revenue</span>
+          <strong>{{ totalRevenue() | currency:'THB':'symbol':'1.2-2' }}</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label noto-sans-thai-f">Quantity Sold</span>
+          <strong>{{ totalQuantitySold() }}</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label noto-sans-thai-f">Inventory Cost</span>
+          <strong>{{ totalProductCost() | currency:'THB':'symbol':'1.2-2' }}</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label noto-sans-thai-f">Low Stock</span>
+          <strong>{{ lowStockCount() }}</strong>
+        </article>
+      </div>
+    </section>
+
+    <section class="report-layout">
+      <article class="report-panel export-panel">
+        <div class="panel-heading">
+          <p class="panel-kicker noto-sans-thai-f">Daily Export</p>
+          <h2 class="panel-title noto-sans-thai-f">Download daily sales data</h2>
+        </div>
+
+        <div class="export-row">
+          <label class="search-field export-date-field">
+            <span class="noto-sans-thai-f">Report date</span>
+            <input
+              type="date"
+              class="noto-sans-thai-f"
+              [ngModel]="reportDate()"
+              [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="reportDate.set($event)"
+            />
+          </label>
+
+          <div class="export-stat-grid">
+            <article class="mini-stat">
+              <span class="stat-label noto-sans-thai-f">Bills</span>
+              <strong>{{ dailySales().length }}</strong>
+            </article>
+            <article class="mini-stat">
+              <span class="stat-label noto-sans-thai-f">Qty</span>
+              <strong>{{ dailyQuantitySold() }}</strong>
+            </article>
+            <article class="mini-stat">
+              <span class="stat-label noto-sans-thai-f">Revenue</span>
+              <strong>{{ dailyRevenue() | currency:'THB':'symbol':'1.2-2' }}</strong>
+            </article>
+            <article class="mini-stat">
+              <span class="stat-label noto-sans-thai-f">Profit</span>
+              <strong>{{ dailyRevenue() - dailyEstimatedCost() | currency:'THB':'symbol':'1.2-2' }}</strong>
+            </article>
+          </div>
+
+          <div class="export-actions">
+            <button type="button" class="secondary-button noto-sans-thai-f" (click)="downloadDailySalesCsv()">
+              CSV
+            </button>
+            <button type="button" class="secondary-button noto-sans-thai-f" (click)="downloadDailySalesExcel()">
+              Excel
+            </button>
+            <button type="button" class="secondary-button noto-sans-thai-f" (click)="downloadDailySalesPdf()">
+              PDF
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <article class="report-panel inventory-panel">
+        <div class="panel-heading">
+          <p class="panel-kicker noto-sans-thai-f">Inventory Search</p>
+          <h2 class="panel-title noto-sans-thai-f">Remaining quantity and cost</h2>
+        </div>
+
+        <div class="search-row">
+          <label class="search-field">
+            <span class="noto-sans-thai-f">Product keyword / barcode</span>
+            <input
+              type="text"
+              class="noto-sans-thai-f"
+              [ngModel]="productKeyword()"
+              [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="productKeyword.set($event)"
+              (keyup.enter)="searchProductsFromFirstPage()"
+              placeholder="Name, SKU, SPU, or barcode"
+            />
+          </label>
+          <button type="button" class="primary-button noto-sans-thai-f" (click)="searchProductsFromFirstPage()" [disabled]="isLoadingProducts()">
+            {{ isLoadingProducts() ? 'Searching...' : 'Search' }}
+          </button>
+          <button type="button" class="ghost-action noto-sans-thai-f" (click)="clearProductSearch()" [disabled]="isLoadingProducts()">
+            Clear
+          </button>
+        </div>
+
+        @if (productError()) {
+          <p class="error-message noto-sans-thai-f">{{ productError() }}</p>
+        }
+
+        <div class="table-wrap">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Remaining</th>
+                <th>Cost</th>
+                <th>Inventory Value</th>
+                <th>Selling Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (product of products(); track product.searchProductSpu + '-' + product.searchProductSku) {
+                <tr [class.is-low-stock]="product.searchProductAmount <= 5">
+                  <td>
+                    <strong>{{ product.searchProductName }}</strong>
+                    <span>{{ product.searchProductBarCode }}</span>
+                  </td>
+                  <td>
+                    <strong>{{ product.searchProductSku }}</strong>
+                    <span>{{ product.searchProductSpu }}</span>
+                  </td>
+                  <td>{{ product.searchProductAmount }} {{ product.searchUnitOfMeasure || 'pcs' }}</td>
+                  <td>{{ getProductCost(product) | currency:'THB':'symbol':'1.2-2' }}</td>
+                  <td>{{ getProductInventoryValue(product) | currency:'THB':'symbol':'1.2-2' }}</td>
+                  <td>{{ product.searchProductSellingPricePerUnit | currency:'THB':'symbol':'1.2-2' }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="empty-cell">No products found.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination-row">
+          <span class="page-summary noto-sans-thai-f">
+            {{ productTotalElements() }} products | Page {{ productTotalPages() === 0 ? 0 : productPage() + 1 }} / {{ productTotalPages() }}
+          </span>
+          <div class="pagination-actions">
+            <button
+              type="button"
+              class="ghost-action noto-sans-thai-f"
+              (click)="goToProductPage(productPage() - 1)"
+              [disabled]="productPage() === 0 || isLoadingProducts()"
+            >
+              Prev
+            </button>
+            <button
+              type="button"
+              class="ghost-action noto-sans-thai-f"
+              (click)="goToProductPage(productPage() + 1)"
+              [disabled]="productPage() >= productTotalPages() - 1 || isLoadingProducts()"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <article class="report-panel sales-panel">
+        <div class="panel-heading-row">
+          <div class="panel-heading">
+            <p class="panel-kicker noto-sans-thai-f">Sales</p>
+            <h2 class="panel-title noto-sans-thai-f">Saved sale bills</h2>
+          </div>
+          <button type="button" class="secondary-button noto-sans-thai-f" (click)="loadSales()" [disabled]="isLoadingSales()">
+            {{ isLoadingSales() ? 'Loading...' : 'Refresh' }}
+          </button>
+        </div>
+
+        <label class="search-field sale-search-field">
+          <span class="noto-sans-thai-f">Filter sales</span>
+          <input
+            type="text"
+            class="noto-sans-thai-f"
+            [ngModel]="saleKeyword()"
+            [ngModelOptions]="{ standalone: true }"
+            (ngModelChange)="updateSaleKeyword($event)"
+            placeholder="Sale ID, cashier, product, SKU, barcode, or note"
+          />
+        </label>
+
+        @if (salesError()) {
+          <p class="error-message noto-sans-thai-f">{{ salesError() }}</p>
+        }
+
+        <div class="sale-list">
+          @for (sale of pagedSales(); track sale.saleId) {
+            <article class="sale-card">
+              <button type="button" class="sale-card-head" (click)="toggleSale(sale.saleId)">
+                <span>
+                  <strong>Sale #{{ sale.saleId }}</strong>
+                  <small>{{ sale.saleDate | date:'medium' }} | {{ sale.cashierFirstName }} {{ sale.cashierLastName }}</small>
+                </span>
+                <span class="sale-total">{{ sale.grandTotal | currency:'THB':'symbol':'1.2-2' }}</span>
+              </button>
+
+              <div class="sale-summary-grid">
+                <span>Subtotal: {{ sale.subtotal | currency:'THB':'symbol':'1.2-2' }}</span>
+                <span>Discount: -{{ sale.billDiscountAmount | currency:'THB':'symbol':'1.2-2' }}</span>
+                <span>Estimated cost: {{ getSaleEstimatedCost(sale) | currency:'THB':'symbol':'1.2-2' }}</span>
+                <span>Estimated profit: {{ getSaleEstimatedProfit(sale) | currency:'THB':'symbol':'1.2-2' }}</span>
+              </div>
+
+              @if (sale.note) {
+                <p class="sale-note noto-sans-thai-f">{{ sale.note }}</p>
+              }
+
+              @if (expandedSaleId() === sale.saleId) {
+                <div class="table-wrap item-table-wrap">
+                  <table class="report-table">
+                    <thead>
+                      <tr>
+                        <th>Item</th>
+                        <th>SKU</th>
+                        <th>Qty</th>
+                        <th>Unit</th>
+                        <th>Discount</th>
+                        <th>Line Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (item of sale.items; track item.saleItemSpu + '-' + item.saleItemSku) {
+                        <tr>
+                          <td>
+                            <strong>{{ item.itemName }}</strong>
+                            <span>{{ item.saleItemBarCode }}</span>
+                          </td>
+                          <td>
+                            <strong>{{ item.saleItemSku }}</strong>
+                            <span>{{ item.saleItemSpu }}</span>
+                          </td>
+                          <td>{{ item.quantity }} {{ item.unitOfMeasure || 'pcs' }}</td>
+                          <td>{{ item.unitPrice | currency:'THB':'symbol':'1.2-2' }}</td>
+                          <td>-{{ item.discountAmount | currency:'THB':'symbol':'1.2-2' }}</td>
+                          <td>{{ item.lineTotal | currency:'THB':'symbol':'1.2-2' }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </article>
+          } @empty {
+            <div class="empty-state noto-sans-thai-f">No sales found.</div>
+          }
+        </div>
+
+        <div class="pagination-row">
+          <span class="page-summary noto-sans-thai-f">
+            {{ filteredSales().length }} sales | Page {{ salesTotalPages() === 0 ? 0 : salesPage() + 1 }} / {{ salesTotalPages() }}
+          </span>
+          <div class="pagination-actions">
+            <button
+              type="button"
+              class="ghost-action noto-sans-thai-f"
+              (click)="goToSalesPage(salesPage() - 1)"
+              [disabled]="salesPage() === 0 || isLoadingSales()"
+            >
+              Prev
+            </button>
+            <button
+              type="button"
+              class="ghost-action noto-sans-thai-f"
+              (click)="goToSalesPage(salesPage() + 1)"
+              [disabled]="salesPage() >= salesTotalPages() - 1 || isLoadingSales()"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+</section>

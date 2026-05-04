@@ -1,0 +1,52 @@
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #243b53;
+}
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.role-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid #d9e2ec;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.role-option:hover {
+  border-color: #b7c7d6;
+  transform: translateY(-1px);
+}
+
+.role-option:has(input:checked) {
+  border-color: var(--theme-green);
+  background: var(--theme-green-soft);
+  box-shadow: 0 0 0 4px var(--theme-green-glow);
+}
+
+.role-option input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--theme-green);
+  flex: 0 0 auto;
+}
+
+.role-option span {
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: #102a43;
+}

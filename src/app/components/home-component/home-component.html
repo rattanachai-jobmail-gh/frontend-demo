@@ -1,0 +1,70 @@
+<section class="home-shell">
+  <div class="home-backdrop"></div>
+
+  <article class="home-card">
+    <p class="eyebrow">TongGaw Shop</p>
+    <h1>Home</h1>
+    <p class="description">
+      Manage your inventory flow from one place.
+    </p>
+
+    @if (isLoading) {
+      <p class="status-text">Loading your session...</p>
+    } @else {
+      <div class="welcome-panel">
+        <p class="welcome-label">Signed in as</p>
+        <p class="welcome-name">{{ username || 'Authenticated user' }}</p>
+      </div>
+    }
+
+    @if (errorMessage) {
+      <p class="error-text">{{ errorMessage }}</p>
+    }
+
+    <div class="action-grid">
+      <button
+        type="button"
+        class="primary-action"
+        (click)="goToAddProductPage()"
+      >
+        Go to add product page
+      </button>
+
+      <button
+        type="button"
+        class="secondary-action"
+        (click)="goToCountProduct()"
+      >
+        หาสินค้าและจัดการสต็อก
+      </button>
+
+
+
+      <button
+        type="button"
+        class="secondary-action"
+        (click)="goToCashier()"
+      >
+        Open cashier
+      </button>
+
+      @if (canViewSalesReport()) {
+        <button
+          type="button"
+          class="secondary-action"
+          (click)="goToSalesReport()"
+        >
+          Daily Sales Report
+        </button>
+      }
+
+      <button
+        type="button"
+        class="secondary-action"
+        (click)="logout()"
+      >
+       Logout
+      </button>
+    </div>
+  </article>
+</section>

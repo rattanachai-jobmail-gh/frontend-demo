@@ -1,0 +1,76 @@
+<section class="register-shell">
+  <div class="register-backdrop"></div>
+
+  <div class="register-card">
+    <div class="brand-block">
+      <p class="eyebrow">Tonggaw Shop</p>
+      <h1>Create account</h1>
+      <p class="subtitle">
+        Register a new user and choose the starting role. This page is available only by direct URL.
+      </p>
+    </div>
+<!-- 
+    @if (errorMessage) {
+      <p class="status-message error">{{ errorMessage }}</p>
+    }
+
+    @if (successMessage) {
+      <p class="status-message success">{{ successMessage }}</p>
+    } -->
+
+    <form class="register-form" (submit)="onRegisterSubmit(); $event.preventDefault()">
+      <label class="field">
+        <span>First name</span>
+        <input
+          type="text"
+          autocomplete="given-name"
+          placeholder="Enter first name"
+          [formField]="registerForm.firstname"
+        />
+      </label>
+
+      <label class="field">
+        <span>Last name</span>
+        <input
+          type="text"
+          autocomplete="family-name"
+          placeholder="Enter last name"
+          [formField]="registerForm.lastname"
+         
+        />
+      </label>
+
+      <label class="field">
+        <span>Username</span>
+        <input
+          type="text"
+          autocomplete="username"
+          placeholder="Choose a username"
+          [formField]="registerForm.username"
+        />
+      </label>
+
+      <label class="field">
+        <span>Password</span>
+        <input
+          type="password"
+          autocomplete="new-password"
+          placeholder="Create a password"
+          [formField]="registerForm.password"
+
+        />
+      </label>
+      
+      <app-roles-check [selectedRolesInput]="selectedRolesDisable" (rolesCheckEvent)="onReceive($event)"></app-roles-check>
+
+      <button
+        class="register-button"
+        type="submit"
+        
+        
+      >
+        Create Account
+      </button>
+    </form>
+  </div>
+</section>

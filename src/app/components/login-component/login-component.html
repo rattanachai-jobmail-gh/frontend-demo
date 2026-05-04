@@ -1,0 +1,48 @@
+<section class="login-shell">
+  <div class="login-backdrop"></div>
+
+  <div class="login-card">
+    <div class="brand-block">
+      <p class="eyebrow">Tonggaw Shop</p>
+      <h1>Welcome back</h1>
+      <p class="subtitle">
+        Sign in to manage products, sales, and cashier workflows.
+      </p>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="status-message error">{{ errorMessage() }}</p>
+    }
+
+    <form class="login-form" (submit)="onLoginSubmit(); $event.preventDefault()">
+      <label class="field">
+        <span>Username</span>
+        <input
+          type="text"
+
+          autocomplete="username"
+          placeholder="Enter your username"
+          [formField]="loginForm.username"
+        />
+      </label>
+
+      <label class="field">
+        <span>Password</span>
+        <input
+          type="password"
+
+          autocomplete="current-password"
+          placeholder="Enter your password"
+          [formField]="loginForm.password"
+        />
+      </label>
+
+      <button
+        class="login-button"
+        type="submit"
+      >
+        Sign In
+      </button>
+    </form>
+  </div>
+</section>
