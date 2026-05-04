@@ -15,7 +15,7 @@ import { Observable } from 'rxjs';
 export class ProductService {
   
   private http = inject(HttpClient);
-  private productUrl = `https://tonggaw.onrender.com/productApi`;
+  private productUrl = `http://tonggaw.onrender.com/productApi`;
 
 
   addNewProduct(productData: Product): Observable<{ message: string, productSku: string }> {

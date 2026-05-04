@@ -12,8 +12,8 @@ export class AuthService {
 
   private http = inject(HttpClient);
 
-  private baseUrl = `https://tonggaw.onrender.com/auth`;
-  private csrfUrl = `https://tonggaw.onrender.com/csrfApi`;
+  private baseUrl = `http://tonggaw.onrender.com/auth`;
+  private csrfUrl = `http://tonggaw.onrender.com/csrfApi`;
 
   
 

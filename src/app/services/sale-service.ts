@@ -9,7 +9,7 @@ import { SaleCheckoutResponse } from '../models/sale-checkout-response';
 })
 export class SaleService {
   private http = inject(HttpClient);
-  private saleUrl = `https://tonggaw.onrender.com/saleApi`;
+  private saleUrl = `http://tonggaw.onrender.com/saleApi`;
 
   checkoutSale(payload: SaleCheckoutRequest): Observable<SaleCheckoutResponse> {
     return this.http.post<SaleCheckoutResponse>(`${this.saleUrl}/checkout`, payload, {
