@@ -119,18 +119,11 @@ export class AddProductComponent implements OnDestroy{
         }
         this.scanner = new Html5QrcodeScanner(
           this.scannerRegionId,{
-            fps: 10,
+            fps: 12,
             qrbox: { width: 260, height: 160 },
             supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
             formatsToSupport: [
-              Html5QrcodeSupportedFormats.QR_CODE,
-              Html5QrcodeSupportedFormats.CODE_128,
-              Html5QrcodeSupportedFormats.CODE_39,
               Html5QrcodeSupportedFormats.EAN_13,
-              Html5QrcodeSupportedFormats.EAN_8,
-              Html5QrcodeSupportedFormats.UPC_A,
-              Html5QrcodeSupportedFormats.UPC_E,
-              Html5QrcodeSupportedFormats.ITF,
             ],
             showTorchButtonIfSupported: true,
             rememberLastUsedCamera: true,
