@@ -14,13 +14,14 @@
       <p class="status-message error">{{ errorMessage() }}</p>
     }
 
-    <form class="login-form" (submit)="onLoginSubmit(); $event.preventDefault()">
+    <form class="login-form" novalidate (submit)="onLoginSubmit(); $event.preventDefault()">
       <label class="field">
         <span>Username</span>
         <input
           type="text"
-
           autocomplete="username"
+          autocapitalize="none"
+          spellcheck="false"
           placeholder="Enter your username"
           [formField]="loginForm.username"
         />
@@ -30,8 +31,9 @@
         <span>Password</span>
         <input
           type="password"
-
           autocomplete="current-password"
+          autocapitalize="none"
+          spellcheck="false"
           placeholder="Enter your password"
           [formField]="loginForm.password"
         />

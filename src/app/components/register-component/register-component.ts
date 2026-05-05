@@ -3,7 +3,6 @@ import { AuthService } from '../../services/auth-service';
 import { RegisterDTO } from '../../models/register-dto';
 import {form, FormField, required, submit} from '@angular/forms/signals';
 import { RolesCheck } from './roles-check/roles-check';
-import { compileHmrUpdateCallback } from '@angular/compiler';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -15,8 +14,9 @@ import { firstValueFrom } from 'rxjs';
 export class RegisterComponent {
 
   private authService = inject(AuthService); 
-  private roles_set = new Set<string>();
   selectedRolesDisable: boolean = false; 
+  errorMessage = signal('');
+  successMessage = signal('');
   private registerDto: RegisterDTO = {
       firstname: '',
       lastname: '',
@@ -38,17 +38,29 @@ export class RegisterComponent {
 
 
   async onRegisterSubmit() {
-    
-    console.log("submit clicked");
-    console.log("model before submit:", this.registerModel());
+    this.errorMessage.set('');
+    this.successMessage.set('');
 
     const success = await submit(this.registerForm, async (field) => {
-      const result = await firstValueFrom(this.authService.register(field().value()));
-        console.log("result: ",result);
+      try {
+        const result = await firstValueFrom(this.authService.register(field().value()));
+        this.successMessage.set(`Created account for ${result.username}`);
+        console.log('result: ', result);
+        return;
+      } catch (error: any) {
+        const apiMessage =
+          typeof error?.error?.error === 'string'
+            ? error.error.error
+            : 'Unable to create account right now';
+
+        this.errorMessage.set(apiMessage);
+        return { kind: 'serverError', message: apiMessage };
+      }
     });
+
     if (success) {
       this.selectedRolesDisable = true;
-      this.registerModel.set(this.registerDto);
+      this.registerModel.set({ ...this.registerDto });
     }
   }
   onReceive(roles: Set<string>){

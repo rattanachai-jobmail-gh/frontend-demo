@@ -4,6 +4,7 @@ import { RegisterDTO } from '../models/register-dto';
 import { catchError, map, Observable, of } from 'rxjs';
 import { RegisterResponse } from '../models/register-response';
 import { UserLogin } from '../models/user-login';
+import { buildApiUrl } from './api-base';
 
 @Injectable({
   providedIn: 'root',
@@ -12,8 +13,8 @@ export class AuthService {
 
   private http = inject(HttpClient);
 
-  private baseUrl = `https://tonggaw.onrender.com/auth`;
-  private csrfUrl = `https://tonggaw.onrender.com/csrfApi`;
+  private baseUrl = buildApiUrl('/auth');
+  private csrfUrl = buildApiUrl('/csrfApi');
 
   
 

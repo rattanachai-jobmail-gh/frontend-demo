@@ -8,6 +8,7 @@ import { UpdateProductOptionThreeRequest } from '../models/update-product-option
 import { UpdateProductOptionTwoRequest } from '../models/update-product-option-two-request';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { buildApiUrl } from './api-base';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,7 @@ import { Observable } from 'rxjs';
 export class ProductService {
   
   private http = inject(HttpClient);
-  private productUrl = `https://tonggaw.onrender.com/productApi`;
+  private productUrl = buildApiUrl('/productApi');
 
 
   addNewProduct(productData: Product): Observable<{ message: string, productSku: string }> {

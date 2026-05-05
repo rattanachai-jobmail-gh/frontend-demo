@@ -3,13 +3,14 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SaleCheckoutRequest } from '../models/sale-checkout-request';
 import { SaleCheckoutResponse } from '../models/sale-checkout-response';
+import { buildApiUrl } from './api-base';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SaleService {
   private http = inject(HttpClient);
-  private saleUrl = `https://tonggaw.onrender.com/saleApi`;
+  private saleUrl = buildApiUrl('/saleApi');
 
   checkoutSale(payload: SaleCheckoutRequest): Observable<SaleCheckoutResponse> {
     return this.http.post<SaleCheckoutResponse>(`${this.saleUrl}/checkout`, payload, {

@@ -2,6 +2,22 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/auth/(.*)",
+      "destination": "https://tonggaw.onrender.com/auth/$1"
+    },
+    {
+      "source": "/csrfApi/(.*)",
+      "destination": "https://tonggaw.onrender.com/csrfApi/$1"
+    },
+    {
+      "source": "/productApi/(.*)",
+      "destination": "https://tonggaw.onrender.com/productApi/$1"
+    },
+    {
+      "source": "/saleApi/(.*)",
+      "destination": "https://tonggaw.onrender.com/saleApi/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
