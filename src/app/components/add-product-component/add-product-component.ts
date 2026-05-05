@@ -7,6 +7,7 @@ import { ProductService } from '../../services/product-service';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { form, FormField, FormRoot, required } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
+import { playScannerBeep } from '../../services/scanner-beep';
 @Component({
   selector: 'app-add-product-component',
   imports: [FormField, FormRoot, RouterLink, RouterLinkActive],
@@ -140,6 +141,7 @@ export class AddProductComponent implements OnDestroy{
               if (!cleanCode) {
                 return;
               }
+              void playScannerBeep();
               this.lastScannedCode.set(cleanCode);
               this.scannerStatus.set('สแกนบาร์โค้ดสำเร็จ');
               this.productModel.update(product => ({

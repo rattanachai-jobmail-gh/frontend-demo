@@ -11,6 +11,7 @@ import { AuthService } from '../../services/auth-service';
 import { ProductService } from '../../services/product-service';
 import { SearchProductsResponse } from '../../models/search-products-response';
 import { UpdateProductOptionOneRequest } from '../../models/update-product-option-one-request';
+import { playScannerBeep } from '../../services/scanner-beep';
 
 type ScannerMode = 'search' | 'count' | null;
 type EditOptionKey = 'option1' | 'option2' | 'option3';
@@ -335,6 +336,7 @@ export class FindProductComponent implements OnDestroy {
     }
 
     this.lastScannedCode.set(scannedCode);
+    void playScannerBeep();
 
     if (this.scannerMode() === 'search') {
       this.searchKeyword.set(scannedCode);

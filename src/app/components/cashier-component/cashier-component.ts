@@ -14,6 +14,7 @@ import { SearchProductsResponse } from '../../models/search-products-response';
 import { AuthService } from '../../services/auth-service';
 import { ProductService } from '../../services/product-service';
 import { SaleService } from '../../services/sale-service';
+import { playScannerBeep } from '../../services/scanner-beep';
 
 type PaymentMethod = 'cash' | 'transfer';
 type BillDiscountType = 'NONE' | 'AMOUNT' | 'PERCENT';
@@ -429,6 +430,8 @@ export class CashierComponent implements OnDestroy {
             if (!scannedBarcode) {
               return;
             }
+
+            void playScannerBeep();
 
             if (this.scannerMode() === 'count') {
               this.handleCountScan(scannedBarcode);
