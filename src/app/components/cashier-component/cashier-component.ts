@@ -48,6 +48,8 @@ export class CashierComponent implements OnDestroy {
   private readonly scannerRegionId = 'cashier-qr-reader';
   private scanner?: Html5QrcodeScanner;
   private statusMessageTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private scannerReopenTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private readonly scannerReopenDelayMs = 700;
 
   barcodeInput = signal('');
   isLoading = signal(false);
@@ -434,12 +436,19 @@ export class CashierComponent implements OnDestroy {
             void playScannerBeep();
 
             if (this.scannerMode() === 'count') {
-              this.handleCountScan(scannedBarcode);
+              const targetSku = this.countTargetSku();
+              if (this.handleCountScan(scannedBarcode)) {
+                this.pauseScannerBeforeReopen(
+                  'count',
+                  targetSku,
+                  'Ready to scan the same barcode again.'
+                );
+              }
               return;
             }
 
             this.scannerStatus.set(`Scanned: ${scannedBarcode}`);
-            this.closeScanner();
+            this.pauseScannerBeforeReopen('add', null, 'Point the camera at a product barcode.');
             await this.addProductToCartFromBarcode(scannedBarcode);
           },
           () => {
@@ -459,6 +468,7 @@ export class CashierComponent implements OnDestroy {
   }
 
   closeScanner(): void {
+    this.clearScannerReopenTimer();
     this.isScannerOpen.set(false);
     this.scannerStatus.set('Scanner closed.');
     this.scannerMode.set('add');
@@ -474,6 +484,7 @@ export class CashierComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.clearScannerReopenTimer();
     this.clearStatusMessageTimer();
     this.destroyScanner();
   }
@@ -576,26 +587,26 @@ export class CashierComponent implements OnDestroy {
     return Math.min(availableAmount, Math.max(0, Math.floor(parsedValue)));
   }
 
-  private handleCountScan(scannedBarcode: string): void {
+  private handleCountScan(scannedBarcode: string): boolean {
     const targetSku = this.countTargetSku();
     const cartItem = this.cartItems().find((item) => item.productSku === targetSku);
 
     if (!targetSku || !cartItem) {
       this.scannerError.set('No cart item selected for counting.');
-      return;
+      return false;
     }
 
     if (cartItem.barcode.trim() !== scannedBarcode) {
       this.scannerError.set(`Scanned barcode does not match ${cartItem.productName}.`);
       this.scannerStatus.set(`Waiting for barcode ${cartItem.barcode}`);
-      return;
+      return false;
     }
 
     this.scannerError.set('');
 
     if (cartItem.quantity >= cartItem.availableAmount) {
       this.scannerStatus.set(`${cartItem.productName} already reached available stock limit.`);
-      return;
+      return false;
     }
 
     this.increaseQuantity(cartItem.productSku);
@@ -603,6 +614,7 @@ export class CashierComponent implements OnDestroy {
     this.scannerStatus.set(
       `${cartItem.productName} counted. Quantity is now ${updatedItem?.quantity ?? cartItem.quantity}.`
     );
+    return true;
   }
 
   private showTemporaryStatusMessage(message: string, durationMs: number = 2800): void {
@@ -618,6 +630,30 @@ export class CashierComponent implements OnDestroy {
     if (this.statusMessageTimeoutId) {
       clearTimeout(this.statusMessageTimeoutId);
       this.statusMessageTimeoutId = null;
+    }
+  }
+
+  private pauseScannerBeforeReopen(
+    mode: ScannerMode,
+    countTargetSku: string | null,
+    reopenStatus: string
+  ): void {
+    this.clearScannerReopenTimer();
+    this.isScannerOpen.set(false);
+    this.destroyScanner();
+
+    this.scannerReopenTimeoutId = setTimeout(() => {
+      this.scannerReopenTimeoutId = null;
+      this.scannerMode.set(mode);
+      this.countTargetSku.set(countTargetSku);
+      this.openScannerModal(reopenStatus);
+    }, this.scannerReopenDelayMs);
+  }
+
+  private clearScannerReopenTimer(): void {
+    if (this.scannerReopenTimeoutId) {
+      clearTimeout(this.scannerReopenTimeoutId);
+      this.scannerReopenTimeoutId = null;
     }
   }
 
