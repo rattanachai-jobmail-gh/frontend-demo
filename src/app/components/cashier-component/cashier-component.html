@@ -1,8 +1,8 @@
 <section class="cashier-shell">
   <nav class="cashier-nav">
     <div class="nav-brand">
-      <span class="nav-eyebrow noto-sans-thai-f">TongGaw Checkout</span>
-      <div class="nav-title noto-sans-thai-f">Cashier and Payment</div>
+      <span class="nav-eyebrow noto-sans-thai-f">จุดชำระเงิน ตองเก้า</span>
+      <div class="nav-title noto-sans-thai-f">แคชเชียร์ และการชำระเงิน</div>
     </div>
 
     <ul class="nav-links">
@@ -13,17 +13,17 @@
           routerLinkActive="is-active"
           [routerLinkActiveOptions]="{ exact: true }"
         >
-          Home
+          หน้าหลัก
         </a>
       </li>
       <li>
         <a class="nav-link noto-sans-thai-f" routerLink="/find-product" routerLinkActive="is-active">
-          Find Product
+          ค้นหาสินค้า
         </a>
       </li>
       <li>
         <button type="button" class="nav-link nav-link-danger noto-sans-thai-f" (click)="logout()">
-          Logout
+          ออกจากระบบ
         </button>
       </li>
     </ul>
@@ -32,21 +32,20 @@
   <div class="cashier-page">
     <section class="cashier-hero">
       <div class="hero-copy">
-        <p class="hero-kicker noto-sans-thai-f">Cashier Workspace</p>
-        <h1 class="hero-title noto-sans-thai-f">Scan products, collect cash, and save the sale</h1>
+        <p class="hero-kicker noto-sans-thai-f">หน้าจอหลักสำหรับแคชเชียร์</p>
+        <h1 class="hero-title noto-sans-thai-f">สแกนสินค้า เก็บเงินและบันทึกการขาย</h1>
         <p class="hero-description noto-sans-thai-f">
-          This page builds the cart from barcode input, calculates the total, receives customer cash,
-          and saves the completed sale into the database.
+          หน้านี้ใช้สำหรับสร้างรายการสินค้าในรถเข็นจากการสแกนบาร์โค้ด, คำนวณราคารวม, รับเงินสดจากลูกค้า และบันทึกข้อมูลการขายที่เสร็จสมบูรณ์ลงในฐานข้อมูล
         </p>
       </div>
 
       <div class="hero-stat-grid">
         <article class="hero-stat-card">
-          <span class="hero-stat-label noto-sans-thai-f">Items In Cart</span>
+          <span class="hero-stat-label noto-sans-thai-f">สินค้าในตระกร้า</span>
           <strong class="hero-stat-value">{{ totalItems() }}</strong>
         </article>
         <article class="hero-stat-card">
-          <span class="hero-stat-label noto-sans-thai-f">Subtotal</span>
+          <span class="hero-stat-label noto-sans-thai-f">ยอดรวมย่อย</span>
           <strong class="hero-stat-value">{{ subtotal() | currency:'THB':'symbol':'1.2-2' }}</strong>
         </article>
       </div>
@@ -59,26 +58,26 @@
     <section class="cashier-layout">
       <article class="cashier-panel scan-panel">
         <div class="panel-heading">
-          <p class="panel-kicker noto-sans-thai-f">Step 1</p>
-          <h2 class="panel-title noto-sans-thai-f">Add Product To Cart</h2>
+          <p class="panel-kicker noto-sans-thai-f">ขั้นตอนที่ 1</p>
+          <h2 class="panel-title noto-sans-thai-f">เพิ่มสินค้าลงในรถเข็น</h2>
           <p class="panel-copy noto-sans-thai-f">
-            Choose either manual barcode entry or camera scanning to add products.
+            เลือกการป้อนบาร์โค้ดด้วยตนเองหรือการสแกนกล้องเพื่อเพิ่มสินค้า
           </p>
         </div>
 
         <div class="entry-mode-grid">
           <article class="entry-mode-card">
             <div class="entry-mode-head">
-              <p class="entry-mode-kicker noto-sans-thai-f">Manual Entry</p>
-              <h3 class="entry-mode-title noto-sans-thai-f">Enter Barcode</h3>
+              <p class="entry-mode-kicker noto-sans-thai-f">ป้อนด้วยตนเอง</p>
+              <h3 class="entry-mode-title noto-sans-thai-f">ป้อนบาร์โค้ด</h3>
               <p class="entry-mode-copy noto-sans-thai-f">
-                Type a barcode manually and press Enter or click the action button.
+                ป้อนบาร์โค้ดด้วยตนเองและกด Enter หรือคลิกที่ปุ่มดำเนินการ
               </p>
             </div>
 
             <div class="scan-entry-row">
               <label class="search-field search-field-grow">
-                <span class="noto-sans-thai-f">Barcode</span>
+                <span class="noto-sans-thai-f">บาร์โค้ด</span>
                 <input
                   type="text"
                   class="noto-sans-thai-f"
@@ -96,17 +95,17 @@
                 (click)="addManualBarcodeToCart()"
                 [disabled]="isLoading()"
               >
-                {{ isLoading() ? 'Adding...' : 'Add To Cart' }}
+                {{ isLoading() ? 'Adding...' : 'เพิ่มลงในตระกร้า' }}
               </button>
             </div>
           </article>
 
           <article class="entry-mode-card entry-mode-card-scan">
             <div class="entry-mode-head">
-              <p class="entry-mode-kicker noto-sans-thai-f">Barcode Scan</p>
-              <h3 class="entry-mode-title noto-sans-thai-f">Use Camera</h3>
+              <p class="entry-mode-kicker noto-sans-thai-f">สแกนบาร์โค้ด</p>
+              <h3 class="entry-mode-title noto-sans-thai-f">ใช้กล้อง</h3>
               <p class="entry-mode-copy noto-sans-thai-f">
-                Open the camera and scan a product barcode to add it automatically.
+                เปิดกล้องและสแกนบาร์โค้ดสินค้าเพื่อเพิ่มลงในรถเข็นโดยอัตโนมัติ
               </p>
             </div>
 
@@ -116,34 +115,34 @@
               (click)="openScanner()"
               [disabled]="isLoading()"
             >
-              Open Scanner
+              เปิด Scanner
             </button>
           </article>
         </div>
 
         <div class="scan-help-card">
-          <p class="scan-help-title noto-sans-thai-f">Quick Notes</p>
+          <p class="scan-help-title noto-sans-thai-f">หมายเหตุเพิ่มเติม</p>
           <ul class="scan-help-list noto-sans-thai-f">
-            <li>Scanning the same product again increases its quantity in the cart.</li>
-            <li>Only cash payment is enabled right now.</li>
-            <li>Checkout saves both the sale bill and sale items into the database.</li>
+            <li>การสแกนสินค้าชิ้นเดิมซ้ำจะเป็นการเพิ่มจำนวนของสินค้านั้นในรถเข็น</li>
+            <li>ปัจจุบันรองรับการชำระเงินด้วยเงินสดเท่านั้น</li>
+            <li>การชำระเงินจะบันทึกทั้งใบเสร็จรับเงินและรายการสินค้าที่ขายลงในฐานข้อมูล</li>
           </ul>
         </div>
       </article>
 
       <article class="cashier-panel cart-panel">
         <div class="panel-heading">
-          <p class="panel-kicker noto-sans-thai-f">Step 2</p>
-          <h2 class="panel-title noto-sans-thai-f">Cart</h2>
+          <p class="panel-kicker noto-sans-thai-f">ขั้นตอนที่ 2</p>
+          <h2 class="panel-title noto-sans-thai-f">ตระกร้าสินค้า</h2>
           <p class="panel-copy noto-sans-thai-f">
-            Review quantity and remove unwanted items before checkout.
+            ตรวจสอบจำนวนและลบสินค้าที่ไม่ต้องการก่อนชำระเงิน.
           </p>
         </div>
 
         <div class="cart-list">
           @if (cartItems().length === 0) {
             <div class="empty-state noto-sans-thai-f">
-              No items in cart yet. Start by entering or scanning a barcode.
+              ยังไม่มีสินค้าในตระกร้า ลองป้อนหรือสแกนบาร์โค้ดเพื่อเริ่มต้น
             </div>
           } @else {
             @for (item of cartItems(); track item.productSku) {
@@ -156,7 +155,7 @@
                     </p>
                   </div>
                   <button type="button" class="ghost-action remove-button noto-sans-thai-f" (click)="removeCartItem(item.productSku)">
-                    Remove
+                    ลบ
                   </button>
                 </div>
 
@@ -203,7 +202,7 @@
                       class="secondary-button count-scan-button noto-sans-thai-f"
                       (click)="openCountScanner(item)"
                     >
-                      Scan To Count
+                      สแกนเพื่อจัดการจำนวน
                     </button>
                   </div>
 
@@ -220,7 +219,7 @@
                           [class.is-active]="item.discountType === 'NONE'"
                           (click)="setCartItemDiscountType(item.productSku, 'NONE')"
                         >
-                          No Discount
+                          ไม่มีส่วนลด
                         </button>
                         <button
                           type="button"
@@ -228,7 +227,7 @@
                           [class.is-active]="item.discountType === 'AMOUNT'"
                           (click)="setCartItemDiscountType(item.productSku, 'AMOUNT')"
                         >
-                          Amount
+                          ตัวราคาส่วนลด
                         </button>
                         <button
                           type="button"
@@ -236,7 +235,7 @@
                           [class.is-active]="item.discountType === 'PERCENT'"
                           (click)="setCartItemDiscountType(item.productSku, 'PERCENT')"
                         >
-                          Percent
+                          เปอร์เซ็นต์
                         </button>
                       </div>
 
@@ -263,9 +262,9 @@
                   <div class="price-block price-block-total">
                     <span class="price-label noto-sans-thai-f">Sale Item Summary</span>
                     <div class="line-summary-grid noto-sans-thai-f">
-                      <span>Gross: {{ getCartItemGrossTotal(item) | currency:'THB':'symbol':'1.2-2' }}</span>
-                      <span>Discount: -{{ getCartItemDiscountAmount(item) | currency:'THB':'symbol':'1.2-2' }}</span>
-                      <span>Net Unit: {{ getCartItemNetUnitPrice(item) | currency:'THB':'symbol':'1.2-2' }}</span>
+                      <span>ยอดรวมก่อนหักส่วนลด: {{ getCartItemGrossTotal(item) | currency:'THB':'symbol':'1.2-2' }}</span>
+                      <span>ส่วนลด: -{{ getCartItemDiscountAmount(item) | currency:'THB':'symbol':'1.2-2' }}</span>
+                      <span>ราคาสุทธิต่อหน่วย: {{ getCartItemNetUnitPrice(item) | currency:'THB':'symbol':'1.2-2' }}</span>
                     </div>
                     <strong>{{ getCartItemLineTotal(item) | currency:'THB':'symbol':'1.2-2' }}</strong>
                   </div>
@@ -277,17 +276,17 @@
 
         <div class="cart-footer">
           <button type="button" class="ghost-action noto-sans-thai-f" (click)="clearCart()" [disabled]="cartItems().length === 0">
-            Clear Cart
+            ล้างตระกร้า
           </button>
         </div>
       </article>
 
       <article class="cashier-panel payment-panel">
         <div class="panel-heading">
-          <p class="panel-kicker noto-sans-thai-f">Step 3</p>
-          <h2 class="panel-title noto-sans-thai-f">Payment</h2>
+          <p class="panel-kicker noto-sans-thai-f">ขั้นตอนที่ 3</p>
+          <h2 class="panel-title noto-sans-thai-f">การชำระเงิน</h2>
           <p class="panel-copy noto-sans-thai-f">
-            Review totals, receive cash, then save the sale into the database.
+            ทบทนี้ใช้สำหรับตรวจสอบยอดรวมทั้งหมด, รับเงินสดจากลูกค้า และบันทึกการขายลงในฐานข้อมูลหลังจากชำระเงินเสร็จสมบูรณ์
           </p>
         </div>
 
@@ -298,8 +297,8 @@
             [class.is-active]="paymentMethod() === 'cash'"
             (click)="setPaymentMethod('cash')"
           >
-            <span class="method-label">Cash</span>
-            <strong class="method-status">Enabled</strong>
+            <span class="method-label">เงินสด</span>
+            <strong class="method-status">เปิดใช้งาน</strong>
           </button>
 
           <button
@@ -308,27 +307,27 @@
             aria-disabled="true"
             (click)="setPaymentMethod('transfer')"
           >
-            <span class="method-label">Transfer</span>
-            <strong class="method-status">Disabled For Now</strong>
+            <span class="method-label">การโอนเงิน</span>
+            <strong class="method-status">ยังไม่เปิดใช้งาน</strong>
           </button>
         </div>
 
         <div class="payment-summary-card">
           <div class="summary-row">
-            <span class="noto-sans-thai-f">Total Quantity</span>
+            <span class="noto-sans-thai-f">จำนวนสินค้า</span>
             <strong>{{ totalItems() }}</strong>
           </div>
           <div class="summary-row">
-            <span class="noto-sans-thai-f">Subtotal</span>
+            <span class="noto-sans-thai-f">ยอดรวมย่อย</span>
             <strong class="summary-total">{{ subtotal() | currency:'THB':'symbol':'1.2-2' }}</strong>
           </div>
         </div>
 
         <div class="discount-card">
           <div class="discount-head">
-            <p class="panel-kicker noto-sans-thai-f">Discount</p>
+            <p class="panel-kicker noto-sans-thai-f">ส่วนลด</p>
             <p class="panel-copy noto-sans-thai-f">
-              Apply a bill discount before receiving customer cash.
+              ใช้ส่วนลดในใบเสร็จก่อนรับเงินจากลูกค้า
             </p>
           </div>
 
@@ -339,7 +338,7 @@
               [class.is-active]="billDiscountType() === 'NONE'"
               (click)="setBillDiscountType('NONE')"
             >
-              No Discount
+              ไม่มีส่วนลด
             </button>
             <button
               type="button"
@@ -347,7 +346,7 @@
               [class.is-active]="billDiscountType() === 'AMOUNT'"
               (click)="setBillDiscountType('AMOUNT')"
             >
-              Discount Amount
+              ตัวราคาส่วนลด
             </button>
             <button
               type="button"
@@ -355,7 +354,7 @@
               [class.is-active]="billDiscountType() === 'PERCENT'"
               (click)="setBillDiscountType('PERCENT')"
             >
-              Discount Percent
+              เปอร์เซ็นต์ส่วนลด
             </button>
           </div>
 
@@ -378,18 +377,18 @@
           }
 
           <div class="summary-row discount-summary-row">
-            <span class="noto-sans-thai-f">Calculated Discount</span>
+            <span class="noto-sans-thai-f">คำนวณส่วนลด</span>
             <strong class="discount-value">-{{ discountAmount() | currency:'THB':'symbol':'1.2-2' }}</strong>
           </div>
 
           <div class="summary-row grand-total-row">
-            <span class="noto-sans-thai-f">Grand Total</span>
+            <span class="noto-sans-thai-f">ยอดรวมทั้งหมด</span>
             <strong class="summary-total">{{ grandTotal() | currency:'THB':'symbol':'1.2-2' }}</strong>
           </div>
         </div>
 
         <label class="cash-field">
-          <span class="noto-sans-thai-f">Received Cash</span>
+          <span class="noto-sans-thai-f">เงินสดที่รับ</span>
           <input
             type="number"
             min="0"
@@ -403,7 +402,7 @@
         </label>
 
         <label class="cash-field">
-          <span class="noto-sans-thai-f">Sale Note</span>
+          <span class="noto-sans-thai-f">หมายเหตุการขาย</span>
           <textarea
             class="noto-sans-thai-f"
             [ngModel]="saleNoteInput()"
@@ -416,23 +415,23 @@
 
         <div class="payment-result-grid">
           <article class="result-card">
-            <span class="result-label noto-sans-thai-f">Received</span>
+            <span class="result-label noto-sans-thai-f">เงินสดที่รับ</span>
             <strong>{{ receivedCash() | currency:'THB':'symbol':'1.2-2' }}</strong>
           </article>
           <article class="result-card">
-            <span class="result-label noto-sans-thai-f">Discount</span>
+            <span class="result-label noto-sans-thai-f">ส่วนลด</span>
             <strong class="discount-value">-{{ discountAmount() | currency:'THB':'symbol':'1.2-2' }}</strong>
           </article>
           <article class="result-card">
-            <span class="result-label noto-sans-thai-f">Change</span>
+            <span class="result-label noto-sans-thai-f">เงินทอน</span>
             <strong class="result-positive">{{ changeAmount() | currency:'THB':'symbol':'1.2-2' }}</strong>
           </article>
           <article class="result-card result-card-alert">
-            <span class="result-label noto-sans-thai-f">Remaining</span>
+            <span class="result-label noto-sans-thai-f">คงเหลือ</span>
             <strong>{{ remainingAmount() | currency:'THB':'symbol':'1.2-2' }}</strong>
           </article>
           <article class="result-card result-card-total">
-            <span class="result-label noto-sans-thai-f">Grand Total</span>
+            <span class="result-label noto-sans-thai-f">ยอดรวมทั้งหมด</span>
             <strong>{{ grandTotal() | currency:'THB':'symbol':'1.2-2' }}</strong>
           </article>
         </div>
@@ -456,19 +455,19 @@
               <strong>#{{ lastCompletedSale()!.saleId }}</strong>
             </div>
             <div class="summary-row">
-              <span class="noto-sans-thai-f">Discount</span>
+              <span class="noto-sans-thai-f">ส่วนลด</span>
               <strong>-{{ lastCompletedSale()!.billDiscountAmount | currency:'THB':'symbol':'1.2-2' }}</strong>
             </div>
             <div class="summary-row">
-              <span class="noto-sans-thai-f">Grand Total</span>
+              <span class="noto-sans-thai-f">ยอดรวมทั้งหมด</span>
               <strong>{{ lastCompletedSale()!.grandTotal | currency:'THB':'symbol':'1.2-2' }}</strong>
             </div>
             <div class="summary-row">
-              <span class="noto-sans-thai-f">Received</span>
+              <span class="noto-sans-thai-f">เงินสดที่รับ</span>
               <strong>{{ lastCompletedSale()!.receivedAmount | currency:'THB':'symbol':'1.2-2' }}</strong>
             </div>
             <div class="summary-row">
-              <span class="noto-sans-thai-f">Change</span>
+              <span class="noto-sans-thai-f">เงินทอน</span>
               <strong>{{ lastCompletedSale()!.changeAmount | currency:'THB':'symbol':'1.2-2' }}</strong>
             </div>
           </div>
