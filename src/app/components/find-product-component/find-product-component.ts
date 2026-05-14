@@ -347,6 +347,10 @@ export class FindProductComponent implements OnDestroy {
       return;
     }
 
+    if (this.scannerMode() !== 'count') {
+      return;
+    }
+
     const activeSku = this.activeCountProductSku();
     if (!activeSku) {
       this.scannerError.set('ยังไม่ได้เลือกสินค้าที่ต้องการนับ');
@@ -365,9 +369,15 @@ export class FindProductComponent implements OnDestroy {
       return;
     }
 
+    const nextProductAmount = draft.productAmount + 1;
+
     this.scannerError.set('');
-    this.updateDraftField(activeSku, 'productAmount', draft.productAmount + 1);
-    this.scannerStatus.set(`นับสินค้าเพิ่มแล้ว จำนวนปัจจุบัน ${draft.productAmount + 1}`);
+    this.updateDraftField(activeSku, 'productAmount', nextProductAmount);
+    this.scannerStatus.set(`นับสินค้าเพิ่มแล้ว จำนวนปัจจุบัน ${nextProductAmount}`);
+    this.showTemporaryStatusMessage(
+      `นับสินค้าเพิ่มแล้ว จำนวนปัจจุบัน ${nextProductAmount} หากต้องการนับเพิ่มให้กดสแกนอีกครั้ง`
+    );
+    this.closeScanner();
   }
 
   private shouldIgnoreDuplicateScan(scannedCode: string): boolean {
